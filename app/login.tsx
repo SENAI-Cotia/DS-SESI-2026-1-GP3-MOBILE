@@ -1,7 +1,11 @@
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useRouter } from "expo-router";
+
 
 export default function Index() {
+    const router = useRouter();
     return (
+        
         <View style={style.container}>
 
             <View style={style.card}>
@@ -25,7 +29,7 @@ export default function Index() {
                         <Text style={style.textButton}>Entrar</Text>
                     </View>
                 </TouchableOpacity>
-                <Text style={style.labelCentral}>Não possui uma conta?<TouchableOpacity><Text style={style.linkCadastre}>Cadastre-se</Text></TouchableOpacity></Text>
+                <Text style={style.labelCentral}>Não possui uma conta?<TouchableOpacity  onPress={() => router.push("/cadastro")}><Text style={style.linkCadastre}>Cadastre-se</Text></TouchableOpacity></Text>
             </View>
         </View>
 

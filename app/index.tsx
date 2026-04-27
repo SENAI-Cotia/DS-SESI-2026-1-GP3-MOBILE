@@ -8,10 +8,13 @@ export default function Index() {
   return (
     <View>
       <Text>Edit app/index.tsx to edit this screen.</Text>
-
-      <TouchableOpacity
+ <TouchableOpacity
         onPress={() => router.push("/login")}  >
-        <Text>Open Modal</Text>
+        <Text>Login</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => router.push("/cadastro")}  >
+        <Text>Cadastro</Text>
       </TouchableOpacity>
     </View>
   );
