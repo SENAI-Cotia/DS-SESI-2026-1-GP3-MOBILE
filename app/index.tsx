@@ -16,6 +16,14 @@ export default function Index() {
         onPress={() => router.push("/cadastro")}  >
         <Text>Cadastro</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => router.push("/onboarding")}  >
+        <Text>Onboarding</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => router.push("/onboarding2")}  >
+        <Text>Onboarding2</Text>
+      </TouchableOpacity>
     </View>
   );
 }
