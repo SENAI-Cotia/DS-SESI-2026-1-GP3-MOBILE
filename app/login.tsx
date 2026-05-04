@@ -1,15 +1,12 @@
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 
 export default function Index() {
     const router = useRouter();
     return (
-        
         <View style={style.container}>
-
             <View style={style.card}>
-
                 <Image source={require("../assets/images/KOR logo.png")} style={style.logo} />
 
                 <Text style={style.Title}>Login</Text>
@@ -24,7 +21,7 @@ export default function Index() {
                     <Text style={style.link}>Esqueci minha senha</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push("/(tabs)/inicial")}>
                     <View style={style.button}>
                         <Text style={style.textButton}>Entrar</Text>
                     </View>
@@ -39,6 +36,7 @@ const style = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#3E579D",
+        fontFamily: "Martel",
     },
     card: {
         backgroundColor: "#fff",
@@ -86,6 +84,7 @@ const style = StyleSheet.create({
         fontSize: 16,
         fontWeight: "bold",
         textAlign: "center",
+        fontFamily: "Martel",
     },
     input: {
         backgroundColor: "#F9F9F9",
@@ -107,6 +106,7 @@ const style = StyleSheet.create({
         marginLeft: 20,
         marginTop: -13,
         textDecorationLine: "underline",
+        fontFamily: "Martel",
     },
     linkCadastre: {
         color: "#3b58ff",
@@ -114,6 +114,7 @@ const style = StyleSheet.create({
         marginBottom: 15,
         marginLeft: 5,
         textDecorationLine: "underline",
+        fontFamily: "Martel",
     },
 
 
