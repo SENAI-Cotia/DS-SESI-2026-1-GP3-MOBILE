@@ -1,86 +1,87 @@
-import React from 'react';
-import { StyleSheet, Text, View, Image, TextInput, ScrollView, SafeAreaView, StatusBar, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 
 
 export default function Index() {
     return (
-        <ScrollView style={style.container}>
-            <View style={style.header}>
-                <Ionicons style={style.icon} name="chevron-back-outline" size={35} color="#000" />
-                <Image style={style.logo} source={require('../../assets/images/KOR logo.png')} />
-            </View>
-            <View style={style.block}>
-                <View style={style.content}>
-                    <Ionicons style={style.iconPerfil} name="person-circle-outline" size={165} color="#000000" />
-                    <TouchableOpacity style={style.iconCamera}>
-                        <Ionicons name="camera-outline" size={35} color="#ffffff" />
-                    </TouchableOpacity>
-                    <Text style={style.text}>Usuario</Text>
+        <SafeAreaView style={style.container}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={style.header}>
+                    <Ionicons style={style.icon} name="chevron-back-outline" size={35} color="#000" />
+                    <Image style={style.logo} source={require('../../assets/images/KOR logo.png')} />
                 </View>
-            </View>
+                <View style={style.block}>
+                    <View style={style.content}>
+                        <Ionicons style={style.iconPerfil} name="person-circle-outline" size={165} color="#000000" />
+                        <TouchableOpacity style={style.iconCamera}>
+                            <Ionicons name="camera-outline" size={35} color="#ffffff" />
+                        </TouchableOpacity>
+                        <Text style={style.text}>Usuario</Text>
+                    </View>
+                </View>
 
-            <TouchableOpacity style={style.content2}>
-                <Ionicons style={style.icontransparent} name="heart-outline" size={45} color="#000" />
-                <Ionicons style={style.icon2} name="heart-outline" size={34} color="#000" />
-                <Text style={style.text2}>Favorito</Text>
-                <View style={style.iconMask}></View>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={style.content2}>
-                <Ionicons style={style.icontransparent} name="book-outline" size={45} color="#000" />
-                <Ionicons style={style.icon2} name="book-outline" size={34} color="#000" />
-                <Text style={style.text2}>Biblioteca</Text>
-                <View style={style.iconMask}></View>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={style.content2}>
-                <Ionicons style={style.icontransparent} name="star-outline" size={45} color="#000" />
-                <Ionicons style={style.icon2} name="star-outline" size={34} color="#000" />
-                <Text style={style.text2}>Avaliações</Text>
-                <View style={style.iconMask}></View>
-            </TouchableOpacity>
-
-
-            <View style={style.container2}>
                 <TouchableOpacity style={style.content2}>
-                    <Ionicons style={style.icontransparent} name="person-outline" size={45} color="#000" />
-                    <Ionicons style={style.icon2} name="person-outline" size={34} color="#000" />
-                    <Text style={style.text2}>Dados da Conta</Text>
+                    <Ionicons style={style.icontransparent} name="heart-outline" size={45} color="#000" />
+                    <Ionicons style={style.icon2} name="heart-outline" size={34} color="#000" />
+                    <Text style={style.text2}>Favorito</Text>
                     <View style={style.iconMask}></View>
                 </TouchableOpacity>
+
                 <TouchableOpacity style={style.content2}>
-                    <Ionicons style={style.icontransparent} name="help-outline" size={45} color="#000" />
-                    <Ionicons style={style.icon2} name="help-outline" size={34} color="#000" />
-                    <Text style={style.text2}>Suporte</Text>
+                    <Ionicons style={style.icontransparent} name="book-outline" size={45} color="#000" />
+                    <Ionicons style={style.icon2} name="book-outline" size={34} color="#000" />
+                    <Text style={style.text2}>Biblioteca</Text>
                     <View style={style.iconMask}></View>
                 </TouchableOpacity>
+
                 <TouchableOpacity style={style.content2}>
-                    <Ionicons style={style.icontransparent} name="chatbox-ellipses-outline" size={45} color="#000" />
-                    <Ionicons style={style.icon2} name="chatbox-ellipses-outline" size={34} color="#000" /> 
-                    <Text style={style.text2}>FAQ</Text>
+                    <Ionicons style={style.icontransparent} name="star-outline" size={45} color="#000" />
+                    <Ionicons style={style.icon2} name="star-outline" size={34} color="#000" />
+                    <Text style={style.text2}>Avaliações</Text>
                     <View style={style.iconMask}></View>
                 </TouchableOpacity>
-            </View>
 
 
-            <View style={style.container3}>
-                <TouchableOpacity style={style.content3}>
-                    <Ionicons style={style.icontransparent} name="star-outline" size={45} color="#b30000" />
-                    <Ionicons style={style.icon3} name="star-outline" size={34} color="#b30000" />
-                    <Text style={style.exit}>Sair</Text>
-                    <View style={style.iconMask}></View>
-                </TouchableOpacity>
-            </View>
-        </ScrollView>
+                <View style={style.container2}>
+                    <TouchableOpacity style={style.content2}>
+                        <Ionicons style={style.icontransparent} name="person-outline" size={45} color="#000" />
+                        <Ionicons style={style.icon2} name="person-outline" size={34} color="#000" />
+                        <Text style={style.text2}>Dados da Conta</Text>
+                        <View style={style.iconMask}></View>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={style.content2}>
+                        <Ionicons style={style.icontransparent} name="help-outline" size={45} color="#000" />
+                        <Ionicons style={style.icon2} name="help-outline" size={34} color="#000" />
+                        <Text style={style.text2}>Suporte</Text>
+                        <View style={style.iconMask}></View>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={style.content2}>
+                        <Ionicons style={style.icontransparent} name="chatbox-ellipses-outline" size={45} color="#000" />
+                        <Ionicons style={style.icon2} name="chatbox-ellipses-outline" size={34} color="#000" />
+                        <Text style={style.text2}>FAQ</Text>
+                        <View style={style.iconMask}></View>
+                    </TouchableOpacity>
+                </View>
+
+
+                <View style={style.container3}>
+                    <TouchableOpacity style={style.content3}>
+                        <Ionicons style={style.icontransparent} name="star-outline" size={45} color="#b30000" />
+                        <Ionicons style={style.icon3} name="star-outline" size={34} color="#b30000" />
+                        <Text style={style.exit}>Sair</Text>
+                        <View style={style.iconMask}></View>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
 
 const style = StyleSheet.create({
     container: {
         flex: 1,
-        fontFamily: 'Martel',
     },
     logo: {
         width: 80,
@@ -136,10 +137,9 @@ const style = StyleSheet.create({
         marginTop: -55,
     },
     iconCamera: {
-        position: 'absolute',
         alignSelf: 'center',
         marginTop: 60,
-        left: 210,
+        left: 35,
         backgroundColor: '#000000',
         borderRadius: 30,
         padding: 5,

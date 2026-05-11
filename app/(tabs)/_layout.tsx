@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function TabLayout() {
     return (
@@ -19,10 +19,11 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="inicial"
                 options={{
+                    
                     tabBarIcon: ({ focused }) => (
                         <View style={[styles.tabPadrao, focused && styles.tabAtiva]}>
-                            <Ionicons name="home-outline" size={24} color="#ffffff" />
-                            <Text style={styles.textoPadrao}>Início</Text>
+                            <Ionicons name="home-outline" size={24} color={!focused ? '#a4aabd' : '#ffffff'} />
+                            <Text style={[styles.textoPadrao, !focused && styles.textAtiva]}>Início</Text>
                         </View>
                     )
                 }}
@@ -33,8 +34,8 @@ export default function TabLayout() {
                 options={{
                     tabBarIcon: ({ focused }) => (
                         <View style={[styles.tabPadrao, focused && styles.tabAtiva]}>
-                            <Ionicons name="search-outline" size={24} color="#ffffff" />
-                            <Text style={styles.textoPadrao}>Pesquisar</Text>
+                            <Ionicons name="search-outline" size={24} color={!focused ? '#a4aabd' : '#ffffff'} />
+                            <Text style={[styles.textoPadrao, !focused && styles.textAtiva]}>Pesquisar</Text>
                         </View>
                     )
                 }}
@@ -44,7 +45,7 @@ export default function TabLayout() {
                 options={{
                     title: "",
                     tabBarIcon: () => (
-                        <View style={styles.anotacoes}>
+                        <View style={[styles.anotacoes]}>
                             <Ionicons name="book" size={37} color="#3E579D" />
                             <Text style={styles.textAnotacoes}>Anotações</Text>
                         </View>
@@ -56,9 +57,9 @@ export default function TabLayout() {
                 name="leituras"
                 options={{
                     tabBarIcon: ({ focused }) => (
-                        <View style={[styles.tabPadrao, focused && styles.tabAtiva]}>
-                            <Ionicons name="time-outline" size={24} color="#ffffff" />
-                            <Text style={styles.textoPadrao}>Leituras</Text>
+                        <View style={[styles.tabPadrao, focused && styles.tabAtiva, { zIndex: 10 }]}>
+                            <Ionicons name="time-outline" size={24} color={!focused ? '#a4aabd' : '#ffffff'}/>
+                            <Text style={[styles.textoPadrao, !focused && styles.textAtiva]}>Leituras</Text>
                         </View>
                     )
                 }}
@@ -69,8 +70,8 @@ export default function TabLayout() {
                 options={{
                     tabBarIcon: ({ focused }) => (
                         <View style={[styles.tabPadrao, focused && styles.tabAtiva]}>
-                            <Ionicons name="person-outline" size={24} color="#ffffff" />
-                            <Text style={styles.textoPadrao}>Perfil</Text>
+                            <Ionicons name="person-outline" size={24} color={!focused ? '#a4aabd' : '#ffffff'} />
+                            <Text style={[styles.textoPadrao, !focused && styles.textAtiva]}>Perfil</Text>
                         </View>
                     )
                 }}
@@ -85,11 +86,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         borderRadius: 16,
         marginBottom: -18,
+        elevation: 5,
+        width: 70,
+        height: 70,
     },
     tabAtiva: {
-        backgroundColor: '#546DB3',
         width: 70,
-        height: 65,
+        height: 70,
     },
     textoPadrao: {
         color: '#ffffff',
@@ -97,6 +100,9 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         marginTop: 4,
     },
+    textAtiva: {
+        color: '#a4aabd',
+    }, 
     anotacoes: {
         alignItems: 'center',
         justifyContent: 'center',
@@ -107,14 +113,15 @@ const styles = StyleSheet.create({
         borderWidth: 3,
         borderColor: '#4A2B1E',
         top: -15,
-        elevation: 5,
+        elevation: 10,
         shadowColor: '#000000',
         shadowOpacity: 0.3,
+        zIndex: 50,
         shadowOffset: { width: 0, height: 2 },
         shadowRadius: 4,
     },
     textAnotacoes: {
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: '700',
         marginTop: -2,
         color: '#3E579D'

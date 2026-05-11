@@ -1,22 +1,24 @@
 import React from 'react';
-import { StyleSheet, Text, View, Image, TextInput, ScrollView, SafeAreaView, StatusBar, TouchableOpacity} from 'react-native';
+import { StyleSheet, Text, View, Image, TextInput, ScrollView, SafeAreaView, StatusBar, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Platform } from 'react-native';
+import { useRouter } from "expo-router";
 
 const reviews = [
-    { 
-        id: '1', 
-        image: require('../../assets/images/images.jpg'), 
-        title: 'Engenharia Elétrica', 
-        rating: '4,8', 
+    {
+        id: '1',
+        image: require('../../assets/images/images.jpg'),
+        title: 'Engenharia Elétrica',
+        rating: '4,8',
         text: 'Adorei ler este livro, contribuiu muito para o meu aprendizado, super indico para quem quer evoluir em sua carreira.',
         date: '27/04/2026',
         timeAgo: 'Há 2 dias'
     },
-    { 
-        id: '2', 
-        image: require('../../assets/images/images.jpg'), 
-        title: 'Engenharia Elétrica', 
-        rating: '4,8', 
+    {
+        id: '2',
+        image: require('../../assets/images/images.jpg'),
+        title: 'Engenharia Elétrica',
+        rating: '4,8',
         text: 'Adorei ler este livro, contribuiu muito para o meu aprendizado, super indico para quem quer evoluir em sua carreira.',
         date: '27/04/2026',
         timeAgo: 'Há 2 dias'
@@ -24,20 +26,21 @@ const reviews = [
 ];
 
 export default function App() {
+    const router = useRouter();
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#F4F6FB" />
 
-            <ScrollView contentContainerStyle={styles.scrollContent}>
+            <ScrollView contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}>
 
                 <View style={styles.header}>
+
                     <Image style={styles.logo} source={require('../../assets/images/KOR logo.png')} />
+
                     <View style={styles.headerIcons}>
                         <TouchableOpacity style={styles.iconButton}>
-                            <Ionicons name="notifications-outline" size={24} color="#000" />
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.iconButton}>
-                            <Ionicons name="person-circle" size={28} color="#3b5998" />
+                            <Ionicons name="notifications-outline" size={27} color="#000" />
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -54,11 +57,9 @@ export default function App() {
 
                 {reviews.map((item) => (
                     <View key={item.id} style={styles.card}>
-                        
-                        <Image
-                            source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg' }}
-                            style={styles.Avatar}
-                        />
+                        <TouchableOpacity onPress={() => router.push("../")} >
+                            <Image source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg'}} style={styles.Avatar}/>
+                        </TouchableOpacity>
 
                         <View style={styles.cardHeaderRow}>
                             <Text style={styles.dateText}>{item.date}</Text>
@@ -66,11 +67,13 @@ export default function App() {
                         </View>
 
                         <View style={styles.cardBodyRow}>
-                            <Image source={item.image} style={styles.cardImage}/>
-                            
+                            <TouchableOpacity onPress={() => router.push("../livro")}>
+                                <Image source={item.image} style={styles.cardImage} />
+                            </TouchableOpacity>
+
                             <View style={styles.cardTextContent}>
                                 <Text style={styles.cardTitle}>{item.title}</Text>
-                                
+
                                 <View style={styles.ratingContainer}>
                                     <Text style={styles.ratingLabel}>Avaliação:</Text>
                                     <Ionicons name="star" size={14} color="#FFC107" style={styles.starIcon} />
@@ -83,8 +86,7 @@ export default function App() {
 
                     </View>
                 ))}
-
-                <View style={{ height: 100 }} />
+                <View style={{ height: 120 }} />
 
             </ScrollView>
         </SafeAreaView>
@@ -98,7 +100,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         paddingHorizontal: 20,
-        paddingTop: 10,
+        paddingTop: Platform.OS === 'android' ? 45 : 10,
     },
     header: {
         flexDirection: 'row',
@@ -152,23 +154,22 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFF',
         borderWidth: 3,
         borderColor: '#3b5998',
-        borderRadius: 12,
-        marginTop: 3, 
-        marginBottom: 20,
+        borderRadius: 15,
+        marginBottom: 22,
         paddingHorizontal: 15,
         paddingBottom: 20,
         paddingTop: 35,
     },
     Avatar: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
+        width: 50,
+        height: 50,
+        borderRadius: 24,
         position: 'absolute',
-        top: -22,
-        left: 20,
+        top: -55,
+        left: 18,
         borderWidth: 2,
         borderColor: '#FFF',
-        zIndex: 1,
+        zIndex: 5,
     },
     cardHeaderRow: {
         flexDirection: 'row',
