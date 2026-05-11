@@ -24,10 +24,10 @@ export default function Onboarding3() {
                     (review)</Text>
 
                 <Text style={styles.title}>
-                    Descubra novos livros através do nosso app</Text>
+                    Avalie e compartilhe opiniões</Text>
 
                 <Text style={styles.subtitle}>
-                    Veja recomendações e encontre o que sua escola está lendo.</Text>
+                    Dê notas, escreva reviews e veja o que seus colegas acharam.</Text>
             </View>
 
             <TouchableOpacity style={styles.button}>
@@ -87,12 +87,6 @@ const styles = StyleSheet.create({
         textAlign: "center"
     },
 
-    books: {
-        width: 350,
-        height: 300,
-        alignSelf: "center",
-        marginTop: 80
-    },
     text: {
         color: "#ffff",
         fontSize: 35,
