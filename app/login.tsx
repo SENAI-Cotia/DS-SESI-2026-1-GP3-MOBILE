@@ -24,7 +24,7 @@ export default function Index() {
                     <Text style={style.link}>Esqueci minha senha</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push("/inicial")}>
                     <View style={style.button}>
                         <Text style={style.textButton}>Entrar</Text>
                     </View>
