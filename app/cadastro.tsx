@@ -1,7 +1,8 @@
 import { Text, TextInput, StyleSheet, Image, View, TouchableOpacity } from "react-native";
+import { router, useRouter } from "expo-router";
 
 export default function Cadastro() {
-    
+
     return (
 
         <View style={style.container}>
@@ -28,9 +29,18 @@ export default function Cadastro() {
                 <TouchableOpacity style={style.button}>
                     <Text style={style.buttonText}>Cadastrar</Text>
                 </TouchableOpacity>
-            </View>
+            
+           <View style={style.loginArea}>
+    <Text style={style.labelCentral}>Possui uma conta?</Text>
 
+    <TouchableOpacity onPress={() => router.push("/login")}>
+        <Text style={style.linkLogin}>Fazer login</Text>
+    </TouchableOpacity>
+</View>
+</View >
         </View >
+
+       
 
     )
 }
@@ -51,6 +61,13 @@ const style = StyleSheet.create({
         borderLeftWidth: 8,
         borderRightWidth: 8
     },
+    loginContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 25,
+    marginTop: 10,
+},
     title: {
         fontSize: 30,
         textAlign: "center",
@@ -76,12 +93,22 @@ const style = StyleSheet.create({
         textAlign: "center",
         paddingVertical: 12
     },
+    loginArea: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 20,
+},
     loginText: {
         textAlign: "center",
         marginTop: 15
+    
     },
-    link: {
-        color: "blue"
+    linkLogin: {
+        color: "#3b58ff",
+        textAlign: "left",
+        fontWeight: "bold",
+        marginLeft: 5,
+        textDecorationLine: "underline",
     },
     input: {
         backgroundColor: "#F9F9F9",
