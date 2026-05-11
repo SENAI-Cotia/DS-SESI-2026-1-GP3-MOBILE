@@ -12,9 +12,14 @@ export default function Onboarding() {
         >
             <View style={styles.container}>
                 <Image
-                    source={require("../assets/images/logo.png")}
+                    source={require("../assets/images/logo2.png")}
                     style={styles.logo}
                 />
+
+                <Text style={styles.title}>
+                    KINGDOM OF READING
+                </Text>
+
             </View>
         </ImageBackground>
 
@@ -38,7 +43,16 @@ const styles = StyleSheet.create({
     logo: {
         width: 170,
         height: 170,
-        
+        marginBottom: 5,
+        color: "rgb(255, 255, 255), 141, 141)"
+
+    },
+    title: {
+        color: "#fff",
+        fontSize: 18,
+        letterSpacing: 1,
+        fontWeight: "600",
+        marginBottom: 20
     }
 })
 

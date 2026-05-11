@@ -2,10 +2,10 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { Image, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 
-export default function Onboarding2() {
+export default function Onboarding3() {
     return (
         <ImageBackground
-            source={require("../assets/images/fundo2.png")}
+            source={require("../assets/images/fundo3.png")}
             style={styles.Background}
         >
             <View style={styles.container}>
@@ -15,11 +15,19 @@ export default function Onboarding2() {
                 />
             </View>
 
+
+
+
             <View style={styles.textContainer}>
-                <Text style={styles.text}>DESCUBRA,</Text>
-                <Text style={styles.text}>AVALIE</Text>
-                <Text style={styles.text}>E COMPARTILHE</Text>
-                <Text style={styles.text}>LIVROS.</Text>
+
+                <Text style={styles.review}>
+                    (review)</Text>
+
+                <Text style={styles.title}>
+                    Descubra novos livros através do nosso app</Text>
+
+                <Text style={styles.subtitle}>
+                    Veja recomendações e encontre o que sua escola está lendo.</Text>
             </View>
 
             <TouchableOpacity style={styles.button}>
@@ -48,16 +56,42 @@ const styles = StyleSheet.create({
     },
 
     textContainer: {
-        marginTop: 90,
-        padding: 20
+        marginTop: 30,
+
     },
     logo: {
         width: 60,
         height: 60,
-        display: "flex",
-        justifyContent: "center",
+        alignSelf: "center",
         marginTop: 60
+    },
+    title: {
+        color: "#fff",
+        fontSize: 35,
+        fontWeight: "bold",
+        top: 400,
+        marginLeft: 15
+    },
+    subtitle: {
+        color: "#ddd",
+        fontSize: 20,
+        top: 420,
+        marginLeft: 15
 
+    },
+    review: {
+        color: "#fff",
+        fontSize: 35,
+        fontWeight: "bold",
+        top: 250,
+        textAlign: "center"
+    },
+
+    books: {
+        width: 350,
+        height: 300,
+        alignSelf: "center",
+        marginTop: 80
     },
     text: {
         color: "#ffff",
@@ -67,8 +101,8 @@ const styles = StyleSheet.create({
     },
     button: {
         backgroundColor: "#3f51b5",
-        width: 80,
-        height: 80,
+        width: 60,
+        height: 60,
         borderRadius: 70,
         justifyContent: "center",
         alignItems: "center",
@@ -77,21 +111,28 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.3,
         shadowRadius: 4,
+        left: 300,
+        top: 470
     },
     arrow: {
-        fontSize: 24,
+        fontSize: 60,
+        right: 40,
 
     },
 
     skip: {
         position: "absolute",
-        bottom: 20,
+        bottom: 40,
         left: 20,
         marginBottom: 40,
+        width: 80,
+        textAlign: "left"
     },
     textSkip: {
         color: "#fff",
-        width: 40,
+        width: 60,
+
+
     },
 
 
