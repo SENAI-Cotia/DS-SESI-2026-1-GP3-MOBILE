@@ -20,7 +20,7 @@ const reviews = [
     },
     {
         id: '2',
-        avatar: { uri: 'https://randomuser.me/api/portraits/women/44.jpg' },
+        avatar: { uri: 'https://randomuser.me/api/portraits/men/32.jpg' },
         title: 'Engenharia Elétrica',
         rating: '4,0',
         text: 'Muito bom! Recomendo para todos que querem aprender sobre o assunto.',
@@ -140,7 +140,7 @@ export default function App() {
 
                 <View style={{ height: 100 }} />
             </ScrollView>
-            
+
             <Modal visible={showStatusModal} transparent animationType="fade">
                 <Pressable style={styles.overlay} onPress={() => setShowStatusModal(false)}>
                     <View style={styles.statusBox}>
@@ -168,7 +168,7 @@ export default function App() {
 
             <Modal visible={showEditModal} transparent animationType="fade">
                 <Pressable style={styles.overlay} onPress={() => setShowEditModal(false)}>
-                    <Pressable style={styles.editBox} onPress={() => {}}>
+                    <Pressable style={styles.editBox} onPress={() => { }}>
                         <Text style={styles.editTitulo}>Editar leitura</Text>
 
                         <Text style={styles.editLabel}>Data de leitura</Text>
@@ -223,7 +223,7 @@ export default function App() {
 
             <Modal visible={showDadosModal} transparent animationType="fade">
                 <Pressable style={styles.overlay} onPress={() => setShowDadosModal(false)}>
-                    <Pressable style={styles.editBox} onPress={() => {}}>
+                    <Pressable style={styles.editBox} onPress={() => { }}>
                         <View style={styles.dadosHeader}>
                             <Text style={styles.editTitulo}>Dados do livro</Text>
                             <TouchableOpacity onPress={() => setShowDadosModal(false)}>
@@ -260,24 +260,10 @@ export default function App() {
                             <Text style={styles.dadosValor}>320</Text>
                         </View>
                         <View style={styles.dadosDivisor} />
-
-                        <View style={styles.dadosRow}>
-                            <Text style={styles.dadosLabel}>ISBN</Text>
-                            <Text style={styles.dadosValor}>978-3-16-148410-0</Text>
-                        </View>
-                        <View style={styles.dadosDivisor} />
-
                         <View style={styles.dadosRow}>
                             <Text style={styles.dadosLabel}>Gênero</Text>
                             <Text style={styles.dadosValor}>Técnico / Engenharia</Text>
                         </View>
-
-                        <TouchableOpacity
-                            style={[styles.botaoSalvar, { marginTop: 20 }]}
-                            onPress={() => setShowDadosModal(false)}
-                        >
-                            <Text style={{ color: '#fff', fontWeight: 'bold' }}>Fechar</Text>
-                        </TouchableOpacity>
                     </Pressable>
                 </Pressable>
             </Modal>

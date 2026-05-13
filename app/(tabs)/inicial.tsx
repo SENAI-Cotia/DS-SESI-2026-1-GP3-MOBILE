@@ -9,7 +9,7 @@ const reviews = [
         id: '1',
         image: require('../../assets/images/images.jpg'),
         title: 'Engenharia Elétrica',
-        rating: '4,8',
+        rating: '4,0',
         text: 'Adorei ler este livro, contribuiu muito para o meu aprendizado, super indico para quem quer evoluir em sua carreira.',
         date: '27/04/2026',
         timeAgo: 'Há 2 dias'
@@ -18,7 +18,7 @@ const reviews = [
         id: '2',
         image: require('../../assets/images/images.jpg'),
         title: 'Engenharia Elétrica',
-        rating: '4,8',
+        rating: '5,0',
         text: 'Adorei ler este livro, contribuiu muito para o meu aprendizado, super indico para quem quer evoluir em sua carreira.',
         date: '27/04/2026',
         timeAgo: 'Há 2 dias'
