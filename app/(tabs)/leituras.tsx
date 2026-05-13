@@ -80,7 +80,7 @@ export default function Leituras() {
                                     renderItem={({ item }) => (
                                         <TouchableOpacity
                                             style={styles.livroCard}
-                                            onPress={() => router.push('/detalhes')}
+                                            onPress={() => router.push('../livro')}
                                         >
                                             <Image source={item.image} style={styles.livroImagem} />
                                             <Text style={styles.livroData}>{item.data}</Text>
