@@ -1,4 +1,5 @@
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { router } from 'expo-router';
 import { Image, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 
@@ -25,7 +26,7 @@ export default function Onboarding3() {
             <Text style={styles.subtitle}>
                 Participe de desafios, rankings e clubes de leitura</Text>
 
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={() => router.push("/login")}>
                 <Text style={styles.buttonText}>Começar</Text>
             </TouchableOpacity>
 

@@ -1,38 +1,50 @@
-import { Image, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  ImageBackground,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
 import { useRouter } from "expo-router";
-import { Background } from "@react-navigation/elements";
+import { useEffect } from "react";
 
+export default function OnBoarding() {
+  const router = useRouter();
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      router.replace("/onboarding2");
+    }, 2500);
 
-export default function Onboarding() {
-    return (
-        <ImageBackground
-            source={require("../assets/images/fundo1.png")}
-            style={styles.Background}
-        >
-            <View style={styles.container}>
-                <Image
-                    source={require("../assets/images/logo2.png")}
-                    style={styles.logo}
-                />
+    return () => clearTimeout(timer);
+  }, []);
 
-                <Text style={styles.title}>
-                    KINGDOM OF READING
-                </Text>
+  return (
+    <ImageBackground
+      source={require("../assets/images/fundo1.png")}
+      style={styles.Background}
+    >
+      <View style={styles.container}>
+        <Image
+          source={require("../assets/images/logo2.png")}
+          style={styles.logo}
+        />
 
-            </View>
-        </ImageBackground>
-
-    );
+        <Text style={styles.title}>
+          KINGDOM OF READING
+        </Text>
+      </View>
+    </ImageBackground>
+  );
 }
 
 const styles = StyleSheet.create({
     Background: {
         flex: 1,
-        width: 500,
-        height: 890,
-        marginTop: 50,
-        marginBottom: -5,
+        width: "100%",
+        height: "100%",
         alignSelf: "center",
     },
     container: {
@@ -53,6 +65,18 @@ const styles = StyleSheet.create({
         letterSpacing: 1,
         fontWeight: "600",
         marginBottom: 20
+    },
+    button: {
+        backgroundColor: "#fff",
+        paddingHorizontal: 30,
+        paddingVertical: 12,
+        borderRadius: 12,
+    },
+
+    buttonText: {
+        color: "#000",
+        fontWeight: "700",
+        fontSize: 16
     }
 })
 

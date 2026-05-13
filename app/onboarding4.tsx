@@ -1,4 +1,5 @@
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { router } from 'expo-router';
 import { Image, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 
@@ -30,11 +31,11 @@ export default function Onboarding3() {
                     Dê notas, escreva reviews e veja o que seus colegas acharam.</Text>
             </View>
 
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={() => router.push("/onboarding5")}>
                 <AntDesign name="arrow-right" size={27} color="white" />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.skip}>
+            <TouchableOpacity style={styles.skip} onPress={() => router.push("/login")}>
                 <Text style={styles.textSkip}>Skip</Text>
             </TouchableOpacity>
         </ImageBackground>
