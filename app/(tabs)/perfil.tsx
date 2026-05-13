@@ -12,7 +12,7 @@ export default function Perfil() {
 
                 <View style={style.header}>
                     <TouchableOpacity style={style.backButton} onPress={() => router.back()}>
-                        <Ionicons name="chevron-back-outline" size={35} color="#000" />
+                        <Ionicons name="chevron-back-outline" size={26} color="#000" />
                     </TouchableOpacity>
                     <Image style={style.logo} source={require('../../assets/images/KOR logo.png')} />
                 </View>
