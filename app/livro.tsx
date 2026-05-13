@@ -13,7 +13,7 @@ const reviews = [
         id: '1',
         avatar: { uri: 'https://randomuser.me/api/portraits/men/32.jpg' },
         title: 'Engenharia Elétrica',
-        rating: '4,8',
+        rating: '5,0',
         text: 'Adorei ler este livro, contribuiu muito para o meu aprendizado, super indico para quem quer evoluir em sua carreira.',
         date: '27/04/2026',
         timeAgo: 'Há 2 dias',
@@ -22,7 +22,7 @@ const reviews = [
         id: '2',
         avatar: { uri: 'https://randomuser.me/api/portraits/women/44.jpg' },
         title: 'Engenharia Elétrica',
-        rating: '4,5',
+        rating: '4,0',
         text: 'Muito bom! Recomendo para todos que querem aprender sobre o assunto.',
         date: '25/04/2026',
         timeAgo: 'Há 4 dias',
@@ -31,12 +31,9 @@ const reviews = [
 
 export default function App() {
     const router = useRouter();
-
     const [status, setStatus] = useState('Lido');
     const [showStatusModal, setShowStatusModal] = useState(false);
-
     const [liked, setLiked] = useState(false);
-
     const [showEditModal, setShowEditModal] = useState(false);
     const [data, setData] = useState('00/00/0000');
     const [estrelas, setEstrelas] = useState(0);
@@ -44,7 +41,6 @@ export default function App() {
     const [tempData, setTempData] = useState('');
     const [tempEstrelas, setTempEstrelas] = useState(0);
     const [tempComentario, setTempComentario] = useState('');
-
     const [showDadosModal, setShowDadosModal] = useState(false);
 
     function abrirEdicao() {
@@ -53,7 +49,6 @@ export default function App() {
         setTempComentario(comentario);
         setShowEditModal(true);
     }
-
     function salvarEdicao() {
         if (tempData != '') setData(tempData);
         setEstrelas(tempEstrelas);
@@ -145,8 +140,7 @@ export default function App() {
 
                 <View style={{ height: 100 }} />
             </ScrollView>
-
-            {/* Modal Status */}
+            
             <Modal visible={showStatusModal} transparent animationType="fade">
                 <Pressable style={styles.overlay} onPress={() => setShowStatusModal(false)}>
                     <View style={styles.statusBox}>
@@ -172,7 +166,6 @@ export default function App() {
                 </Pressable>
             </Modal>
 
-            {/* Modal Editar */}
             <Modal visible={showEditModal} transparent animationType="fade">
                 <Pressable style={styles.overlay} onPress={() => setShowEditModal(false)}>
                     <Pressable style={styles.editBox} onPress={() => {}}>
