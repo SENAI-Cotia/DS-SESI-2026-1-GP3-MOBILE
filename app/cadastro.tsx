@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { Text, TextInput, StyleSheet, Image, View, TouchableOpacity } from "react-native";
 import { router, useRouter } from "expo-router";
 
@@ -141,6 +142,13 @@ const style = StyleSheet.create({
         textAlign: "center",
         fontWeight: "bold",
 
+    },
+    linkLogin: {
+        color: "#3b58ff",
+        textAlign: "left",
+        marginBottom: 15,
+        marginLeft: 5,
+        textDecorationLine: "underline",
     }
 })
 
