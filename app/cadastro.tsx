@@ -1,7 +1,8 @@
+import { router } from "expo-router";
 import { Text, TextInput, StyleSheet, Image, View, TouchableOpacity } from "react-native";
 
 export default function Cadastro() {
-    
+
     return (
 
         <View style={style.container}>
@@ -28,7 +29,11 @@ export default function Cadastro() {
                 <TouchableOpacity style={style.button}>
                     <Text style={style.buttonText}>Cadastrar</Text>
                 </TouchableOpacity>
+
+                <Text style={style.labelCentral}>Já possui uma conta?<TouchableOpacity onPress={() => router.push("/login")}><Text style={style.linkLogin}>Fazer login</Text></TouchableOpacity></Text>
             </View>
+
+            
 
         </View >
 
@@ -114,6 +119,13 @@ const style = StyleSheet.create({
         textAlign: "center",
         fontWeight: "bold",
 
+    },
+    linkLogin: {
+        color: "#3b58ff",
+        textAlign: "left",
+        marginBottom: 15,
+        marginLeft: 5,
+        textDecorationLine: "underline",
     }
 })
 
