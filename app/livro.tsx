@@ -1,187 +1,249 @@
-import React, { useState } from 'react';
-import {
-    StyleSheet, Text, View, Image, ScrollView, SafeAreaView,
-    TouchableOpacity, Modal, TextInput, Pressable
-} from 'react-native';
+import { useAuth } from '@/context/AuthContext';
+import { api } from '@/lib/api';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+    ActivityIndicator, Alert, Image, Modal, Pressable, SafeAreaView,
+    ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View
+} from 'react-native';
 
-const STATUS_OPTIONS = ['Não lido', 'Lendo', 'Lido', 'Abandonado'];
+interface Livro {
+    id: number;
+    titulo: string;
+    capaUrl?: string;
+    ano?: number;
+    descricao?: string;
+    autor: string;
+    genero: string;
+}
 
-const reviews = [
-    {
-        id: '1',
-        avatar: { uri: 'https://randomuser.me/api/portraits/men/32.jpg' },
-        title: 'Engenharia Elétrica',
-        rating: '5,0',
-        text: 'Adorei ler este livro, contribuiu muito para o meu aprendizado, super indico para quem quer evoluir em sua carreira.',
-        date: '27/04/2026',
-        timeAgo: 'Há 2 dias',
-    },
-    {
-        id: '2',
-        avatar: { uri: 'https://randomuser.me/api/portraits/men/32.jpg' },
-        title: 'Engenharia Elétrica',
-        rating: '4,0',
-        text: 'Muito bom! Recomendo para todos que querem aprender sobre o assunto.',
-        date: '25/04/2026',
-        timeAgo: 'Há 4 dias',
-    },
-];
+interface Avaliacao {
+    id: number;
+    nota: number;
+    comentario?: string;
+    createdAt?: string;
+    usuarioId: number;
+    livroId: number;
+    usuario?: { id: number; nome: string; fotoUrl?: string };
+}
 
-export default function App() {
+function formatData(iso?: string) {
+    if (!iso) return '00/00/0000';
+    return new Date(iso).toLocaleDateString('pt-BR');
+}
+
+export default function LivroScreen() {
     const router = useRouter();
-    const [status, setStatus] = useState('Lido');
-    const [showStatusModal, setShowStatusModal] = useState(false);
-    const [liked, setLiked] = useState(false);
+    const { id } = useLocalSearchParams();
+    const livroId = Number(Array.isArray(id) ? id[0] : id);
+    const { usuario } = useAuth();
+
+    const [livro, setLivro] = useState<Livro | null>(null);
+    const [carregando, setCarregando] = useState(true);
     const [showEditModal, setShowEditModal] = useState(false);
-    const [data, setData] = useState('00/00/0000');
-    const [estrelas, setEstrelas] = useState(0);
-    const [comentario, setComentario] = useState('');
-    const [tempData, setTempData] = useState('');
+
+    // Estado para guardar a avaliação feita pela conta logada
+    const [minhaAvaliacao, setMinhaAvaliacao] = useState<Avaliacao | null>(null);
+    
+    // Estados temporários para a janela modal
     const [tempEstrelas, setTempEstrelas] = useState(0);
     const [tempComentario, setTempComentario] = useState('');
-    const [showDadosModal, setShowDadosModal] = useState(false);
+
+    const [reviews, setReviews] = useState<Avaliacao[]>([]);
+    const [carregandoReviews, setCarregandoReviews] = useState(true);
+    const [salvando, setSalvando] = useState(false);
+
+    // 1. Carrega as informações do livro
+    useEffect(() => {
+        if (!livroId) return;
+        api.get<Livro>(`/livros/${livroId}`)
+            .then(res => setLivro(res.data))
+            .catch(() => {})
+            .finally(() => setCarregando(false));
+    }, [livroId]);
+
+    // 2. Busca todas as avaliações no feed e identifica a do usuário logado neste livro
+    useEffect(() => {
+        if (!livroId) return;
+        setCarregandoReviews(true);
+        api.get<Avaliacao[]>('/feed')
+            .then(res => {
+                const comentariosDoLivro = res.data.filter(a => Number(a.livroId) === livroId);
+                setReviews(comentariosDoLivro);
+
+                // Filtra para saber se a conta atual já avaliou
+                if (usuario?.id) {
+                    const avaliacaoDoUsuario = comentariosDoLivro.find(a => Number(a.usuarioId) === usuario.id);
+                    if (avaliacaoDoUsuario) {
+                        setMinhaAvaliacao(avaliacaoDoUsuario);
+                    } else {
+                        setMinhaAvaliacao(null);
+                    }
+                }
+            })
+            .catch(() => {})
+            .finally(() => setCarregandoReviews(false));
+    }, [livroId, usuario?.id]);
 
     function abrirEdicao() {
-        setTempData(data);
-        setTempEstrelas(estrelas);
-        setTempComentario(comentario);
+        setTempEstrelas(minhaAvaliacao ? minhaAvaliacao.nota : 0);
+        setTempComentario(minhaAvaliacao ? (minhaAvaliacao.comentario || '') : '');
         setShowEditModal(true);
     }
-    function salvarEdicao() {
-        if (tempData != '') setData(tempData);
-        setEstrelas(tempEstrelas);
-        setComentario(tempComentario);
-        setShowEditModal(false);
+
+    async function salvarEdicao() {
+        if (!livro || !usuario?.id) {
+            Alert.alert('Atenção', 'Você precisa estar logado para avaliar.');
+            return;
+        }
+
+        if (tempEstrelas === 0 || tempComentario.trim() === '') {
+            Alert.alert('Atenção', 'Preencha a nota e o comentário.');
+            return;
+        }
+
+        setSalvando(true);
+        try {
+            const res = await api.post<Avaliacao>('/avaliacao', {
+                nota: tempEstrelas,
+                comentario: tempComentario.trim(),
+                usuarioId: usuario.id,
+                livroId: livro.id,
+            });
+
+            // Cria o objeto para atualização local com a data de hoje caso a API não retorne createdAt
+            const novaAvaliacao: Avaliacao = {
+                id: res.data?.id ?? Date.now(),
+                nota: tempEstrelas,
+                comentario: tempComentario.trim(),
+                createdAt: res.data?.createdAt || new Date().toISOString(),
+                usuarioId: usuario.id,
+                livroId: livro.id,
+                usuario: { id: usuario.id, nome: usuario.nome, fotoUrl: usuario.fotoUrl }
+            };
+
+            // Atualiza o card superior exclusivo do usuário logado
+            setMinhaAvaliacao(novaAvaliacao);
+
+            // Atualiza a lista pública de avaliações do livro
+            setReviews(prev => {
+                const filtrados = prev.filter(r => Number(r.usuarioId) !== usuario.id);
+                return [novaAvaliacao, ...filtrados];
+            });
+
+            setShowEditModal(false);
+        } catch (err: any) {
+            Alert.alert('Erro', err.response?.data?.error || 'Não foi possível salvar a avaliação.');
+        } finally {
+            setSalvando(false);
+        }
     }
 
+    if (carregando) {
+        return (
+            <SafeAreaView style={[s.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="large" color="#1a3a5c" />
+            </SafeAreaView>
+        );
+    }
+
+    if (!livro) return null;
+
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={s.container}>
             <ScrollView showsVerticalScrollIndicator={false}>
-
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.back()}>
-                        <Ionicons name="chevron-back-outline" size={28} color="#000" />
+                <View style={s.header}>
+                    <TouchableOpacity style={s.backButton} onPress={() => router.back()}>
+                        <Ionicons name="chevron-back-outline" size={35} color="#000" />
                     </TouchableOpacity>
-                    <Image style={styles.logo} source={require('../assets/images/KOR logo.png')} />
-                    <View style={{ width: 28 }} />
+                    <Image style={s.logo} source={require('../assets/images/KOR logo.png')} />
                 </View>
 
-                <View style={styles.bookInfoContainer}>
-                    <Image style={styles.bookImage} source={require('../assets/images/images.jpg')} />
-                    <TouchableOpacity style={styles.heartButton} onPress={() => setLiked(!liked)}>
-                        <Ionicons name={liked ? 'heart' : 'heart-outline'} size={22} color="#e24b4a" />
-                    </TouchableOpacity>
-                    <Text style={styles.bookTitle}>Engenharia Elétrica</Text>
-                    <Text style={styles.bookAuthor}>autor</Text>
+                <View style={s.bookInfoContainer}>
+                    <Image style={s.bookImage} source={livro.capaUrl ? { uri: livro.capaUrl } : require('../assets/images/images.jpg')} />
+                    <Text style={s.bookTitle}>{livro.titulo}</Text>
+                    <Text style={s.bookAuthor}>{livro.autor}</Text>
                 </View>
 
-                <TouchableOpacity style={styles.dropdown} onPress={() => setShowStatusModal(true)}>
-                    <Text style={styles.dropdownText}>{status}</Text>
-                    <Ionicons name="chevron-down-outline" size={20} color="#000" />
-                </TouchableOpacity>
-
-                <View style={styles.actionsRow}>
-                    <TouchableOpacity style={styles.actionButton} onPress={() => setShowDadosModal(true)}>
-                        <Ionicons name="list-outline" size={20} color="#000" />
-                        <Text style={styles.actionText}>Dados do livro</Text>
-                    </TouchableOpacity>
-                    <View style={styles.divisor} />
-                    <TouchableOpacity style={styles.actionButton}>
-                        <Ionicons name="share-outline" size={20} color="#000" />
-                        <Text style={styles.actionText}>Compartilhar</Text>
-                    </TouchableOpacity>
-                </View>
-
-                <View style={styles.leituraCard}>
-                    <View style={styles.leituraHeader}>
-                        <Text style={styles.leituraTitle}>Dados da sua leitura</Text>
+                {/* ── CARD "DADOS DA SUA LEITURA" (Apenas para o usuário logado) ── */}
+                <View style={s.leituraCard}>
+                    <View style={s.leituraHeader}>
+                        <Text style={s.leituraTitle}>Dados da sua leitura</Text>
                         <TouchableOpacity onPress={abrirEdicao}>
-                            <Text style={styles.editarText}>editar</Text>
+                            <Text style={s.editarText}>{minhaAvaliacao ? 'editar' : 'adicionar'}</Text>
                         </TouchableOpacity>
                     </View>
-                    <Text style={styles.leituraData}>Lido em: {data}</Text>
+
+                    <Text style={s.leituraData}>
+                        Lido em: {minhaAvaliacao ? formatData(minhaAvaliacao.createdAt) : '00/00/0000'}
+                    </Text>
+
                     <View style={{ flexDirection: 'row', marginTop: 8 }}>
                         {[1, 2, 3, 4, 5].map(i => (
                             <Ionicons
                                 key={i}
-                                name={i <= estrelas ? 'star' : 'star-outline'}
+                                name={i <= (minhaAvaliacao?.nota || 0) ? 'star' : 'star-outline'}
                                 size={22}
                                 color="#7ab8e0"
                             />
                         ))}
                     </View>
-                    {comentario != '' && (
-                        <Text style={styles.comentarioSalvo}>{comentario}</Text>
-                    )}
+
+                    {minhaAvaliacao?.comentario ? (
+                        <Text style={s.comentarioSalvo}>{minhaAvaliacao.comentario}</Text>
+                    ) : null}
                 </View>
 
                 <View style={{ paddingHorizontal: 20, marginTop: 16 }}>
-                    <Text style={styles.sectionTitle}>Sobre o Livro</Text>
-                    <Text style={styles.sobreText}>
-                        Este livro é uma introdução abrangente à engenharia elétrica, cobrindo os princípios fundamentais, circuitos elétricos, eletrônica, sistemas de energia e muito mais.
-                    </Text>
+                    <Text style={s.sectionTitle}>Sobre o Livro</Text>
+                    <Text style={s.sobreText}>{livro.descricao ?? 'Sem descrição.'}</Text>
                 </View>
 
-                <View style={{ paddingHorizontal: 20, marginTop: 16, marginBottom: 8 }}>
-                    <Text style={styles.sectionTitle}>Avaliações Recentes</Text>
+                <View style={{ paddingHorizontal: 20, marginTop: 20, marginBottom: 8 }}>
+                    <Text style={s.sectionTitle}>Avaliações Recentes</Text>
                 </View>
 
-                {reviews.map((item) => (
-                    <View key={item.id} style={styles.card}>
-                        <Image source={item.avatar} style={styles.avatar} />
-                        <Text style={styles.cardTitle}>{item.title}</Text>
-                        <Text style={styles.cardRating}>Avaliação: {item.rating}</Text>
-                        <Text style={styles.cardText}>{item.text}</Text>
-                        <Text style={styles.cardDate}>{item.date} - {item.timeAgo}</Text>
-                    </View>
-                ))}
-
-                <View style={{ height: 100 }} />
+                {carregandoReviews ? (
+                    <ActivityIndicator size="small" color="#1a3a5c" style={{ marginVertical: 16 }} />
+                ) : reviews.length === 0 ? (
+                    <Text style={s.semAvaliacoes}>Nenhuma avaliação ainda. Seja o primeiro!</Text>
+                ) : (
+                    reviews.map(item => (
+                        <View key={item.id} style={s.card}>
+                            <View style={s.cardHeaderRow}>
+                                <Image
+                                    source={{ uri: item.usuario?.fotoUrl ?? 'https://randomuser.me/api/portraits/men/32.jpg' }}
+                                    style={s.avatar}
+                                />
+                                <View style={{ flex: 1 }}>
+                                    <Text style={s.cardTitle}>{item.usuario?.nome ?? 'Usuário'}</Text>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
+                                        {[1, 2, 3, 4, 5].map(i => (
+                                            <Ionicons
+                                                key={i}
+                                                name={i <= item.nota ? 'star' : 'star-outline'}
+                                                size={14}
+                                                color="#FFC107"
+                                                style={{ marginRight: 1 }}
+                                            />
+                                        ))}
+                                    </View>
+                                </View>
+                            </View>
+                            {item.comentario ? <Text style={s.cardText}>{item.comentario}</Text> : null}
+                        </View>
+                    ))
+                )}
+                <View style={{ height: 40 }} />
             </ScrollView>
 
-            <Modal visible={showStatusModal} transparent animationType="fade">
-                <Pressable style={styles.overlay} onPress={() => setShowStatusModal(false)}>
-                    <View style={styles.statusBox}>
-                        <Text style={styles.statusTitulo}>Status de leitura</Text>
-                        {STATUS_OPTIONS.map(opcao => (
-                            <TouchableOpacity
-                                key={opcao}
-                                style={styles.statusOpcao}
-                                onPress={() => {
-                                    setStatus(opcao);
-                                    setShowStatusModal(false);
-                                }}
-                            >
-                                <Text style={[styles.statusTexto, status === opcao && styles.statusTextoAtivo]}>
-                                    {opcao}
-                                </Text>
-                                {status === opcao && (
-                                    <Ionicons name="checkmark" size={18} color="#1a3a5c" />
-                                )}
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                </Pressable>
-            </Modal>
-
+            {/* Modal para Editar/Adicionar Avaliação */}
             <Modal visible={showEditModal} transparent animationType="fade">
-                <Pressable style={styles.overlay} onPress={() => setShowEditModal(false)}>
-                    <Pressable style={styles.editBox} onPress={() => { }}>
-                        <Text style={styles.editTitulo}>Editar leitura</Text>
-
-                        <Text style={styles.editLabel}>Data de leitura</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="DD/MM/AAAA"
-                            value={tempData}
-                            onChangeText={setTempData}
-                            keyboardType="numeric"
-                            maxLength={10}
-                        />
-
-                        <Text style={styles.editLabel}>Sua avaliação</Text>
+                <Pressable style={s.overlay} onPress={() => setShowEditModal(false)}>
+                    <Pressable style={s.editBox} onPress={() => {}}>
+                        <Text style={s.editTitulo}>{minhaAvaliacao ? 'Editar leitura' : 'Adicionar leitura'}</Text>
+                        <Text style={s.editLabel}>Sua avaliação</Text>
                         <View style={{ flexDirection: 'row', marginBottom: 18 }}>
                             {[1, 2, 3, 4, 5].map(i => (
                                 <TouchableOpacity key={i} onPress={() => setTempEstrelas(i)}>
@@ -194,10 +256,9 @@ export default function App() {
                                 </TouchableOpacity>
                             ))}
                         </View>
-
-                        <Text style={styles.editLabel}>Comentário</Text>
+                        <Text style={s.editLabel}>Comentário</Text>
                         <TextInput
-                            style={[styles.input, styles.inputComentario]}
+                            style={[s.input, s.inputComentario]}
                             placeholder="Escreva o que achou do livro..."
                             value={tempComentario}
                             onChangeText={setTempComentario}
@@ -205,366 +266,54 @@ export default function App() {
                             numberOfLines={4}
                             textAlignVertical="top"
                         />
-
                         <View style={{ flexDirection: 'row', gap: 10 }}>
-                            <TouchableOpacity
-                                style={styles.botaoCancelar}
-                                onPress={() => setShowEditModal(false)}
-                            >
+                            <TouchableOpacity style={s.botaoCancelar} onPress={() => setShowEditModal(false)}>
                                 <Text style={{ color: '#555' }}>Cancelar</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.botaoSalvar} onPress={salvarEdicao}>
-                                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Salvar</Text>
+                            <TouchableOpacity style={s.botaoSalvar} onPress={salvarEdicao} disabled={salvando}>
+                                {salvando ? (
+                                    <ActivityIndicator size="small" color="#fff" />
+                                ) : (
+                                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>Salvar</Text>
+                                )}
                             </TouchableOpacity>
                         </View>
                     </Pressable>
                 </Pressable>
             </Modal>
-
-            <Modal visible={showDadosModal} transparent animationType="fade">
-                <Pressable style={styles.overlay} onPress={() => setShowDadosModal(false)}>
-                    <Pressable style={styles.editBox} onPress={() => { }}>
-                        <View style={styles.dadosHeader}>
-                            <Text style={styles.editTitulo}>Dados do livro</Text>
-                            <TouchableOpacity onPress={() => setShowDadosModal(false)}>
-                                <Ionicons name="close" size={22} color="#888" />
-                            </TouchableOpacity>
-                        </View>
-
-                        <View style={styles.dadosRow}>
-                            <Text style={styles.dadosLabel}>Título</Text>
-                            <Text style={styles.dadosValor}>Engenharia Elétrica</Text>
-                        </View>
-                        <View style={styles.dadosDivisor} />
-
-                        <View style={styles.dadosRow}>
-                            <Text style={styles.dadosLabel}>Autor</Text>
-                            <Text style={styles.dadosValor}>Fulano de Tal</Text>
-                        </View>
-                        <View style={styles.dadosDivisor} />
-
-                        <View style={styles.dadosRow}>
-                            <Text style={styles.dadosLabel}>Editora</Text>
-                            <Text style={styles.dadosValor}>Livraria Editora</Text>
-                        </View>
-                        <View style={styles.dadosDivisor} />
-
-                        <View style={styles.dadosRow}>
-                            <Text style={styles.dadosLabel}>Ano</Text>
-                            <Text style={styles.dadosValor}>2024</Text>
-                        </View>
-                        <View style={styles.dadosDivisor} />
-
-                        <View style={styles.dadosRow}>
-                            <Text style={styles.dadosLabel}>Páginas</Text>
-                            <Text style={styles.dadosValor}>320</Text>
-                        </View>
-                        <View style={styles.dadosDivisor} />
-                        <View style={styles.dadosRow}>
-                            <Text style={styles.dadosLabel}>Gênero</Text>
-                            <Text style={styles.dadosValor}>Técnico / Engenharia</Text>
-                        </View>
-                    </Pressable>
-                </Pressable>
-            </Modal>
-
         </SafeAreaView>
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#F4F6FB',
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        marginTop: 15,
-        height: 60,
-    },
-    logo: {
-        width: 70,
-        height: 70,
-        resizeMode: 'contain',
-    },
-    bookInfoContainer: {
-        alignItems: 'center',
-        paddingVertical: 16,
-    },
-    bookImage: {
-        width: 140,
-        height: 190,
-        borderRadius: 6,
-        resizeMode: 'cover',
-    },
-    heartButton: {
-        position: 'absolute',
-        top: 16,
-        right: 40,
-        backgroundColor: '#fff',
-        borderRadius: 50,
-        width: 36,
-        height: 36,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 1,
-        borderColor: '#eee',
-    },
-    bookTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#111',
-        marginTop: 12,
-    },
-    bookAuthor: {
-        fontSize: 14,
-        color: '#888',
-        marginTop: 4,
-    },
-    dropdown: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: '#fff',
-        marginHorizontal: 16,
-        marginTop: 10,
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-    },
-    dropdownText: {
-        fontSize: 15,
-        color: '#111',
-    },
-    actionsRow: {
-        flexDirection: 'row',
-        backgroundColor: '#fff',
-        marginHorizontal: 16,
-        marginTop: 8,
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        overflow: 'hidden',
-    },
-    actionButton: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 6,
-        paddingVertical: 12,
-    },
-    divisor: {
-        width: 1,
-        backgroundColor: '#ddd',
-    },
-    actionText: {
-        fontSize: 14,
-        color: '#111',
-    },
-    leituraCard: {
-        backgroundColor: '#1a3a5c',
-        marginHorizontal: 16,
-        marginTop: 10,
-        borderRadius: 10,
-        padding: 16,
-    },
-    leituraHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 6,
-    },
-    leituraTitle: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: '#e8f4ff',
-    },
-    editarText: {
-        fontSize: 13,
-        color: '#7ab8e0',
-    },
-    leituraData: {
-        fontSize: 13,
-        color: '#7ab8e0',
-    },
-    comentarioSalvo: {
-        fontSize: 13,
-        color: '#b0d4f0',
-        marginTop: 10,
-        fontStyle: 'italic',
-        lineHeight: 18,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#111',
-        marginBottom: 8,
-    },
-    sobreText: {
-        fontSize: 13,
-        color: '#444',
-        lineHeight: 20,
-    },
-    card: {
-        backgroundColor: '#fff',
-        borderRadius: 10,
-        marginHorizontal: 16,
-        marginBottom: 16,
-        marginTop: 30,
-        padding: 16,
-        paddingTop: 12,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 3,
-    },
-    avatar: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        position: 'absolute',
-        top: -24,
-        left: 16,
-        borderWidth: 2,
-        borderColor: '#fff',
-    },
-    cardTitle: {
-        fontSize: 15,
-        fontWeight: 'bold',
-        color: '#111',
-        marginTop: 26,
-        marginBottom: 4,
-    },
-    cardRating: {
-        fontSize: 13,
-        color: '#666',
-        marginBottom: 4,
-    },
-    cardText: {
-        fontSize: 13,
-        color: '#333',
-        lineHeight: 19,
-        marginBottom: 8,
-    },
-    cardDate: {
-        fontSize: 12,
-        color: '#999',
-    },
-    overlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.45)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    statusBox: {
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        width: 260,
-        overflow: 'hidden',
-    },
-    statusTitulo: {
-        fontSize: 13,
-        color: '#888',
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-    },
-    statusOpcao: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingVertical: 14,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
-    },
-    statusTexto: {
-        fontSize: 15,
-        color: '#333',
-    },
-    statusTextoAtivo: {
-        fontWeight: 'bold',
-        color: '#1a3a5c',
-    },
-    editBox: {
-        backgroundColor: '#fff',
-        borderRadius: 14,
-        padding: 24,
-        width: '88%',
-    },
-    editTitulo: {
-        fontSize: 17,
-        fontWeight: 'bold',
-        color: '#111',
-        marginBottom: 20,
-    },
-    editLabel: {
-        fontSize: 13,
-        color: '#666',
-        marginBottom: 6,
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        fontSize: 15,
-        color: '#111',
-        marginBottom: 18,
-    },
-    inputComentario: {
-        height: 100,
-        marginBottom: 20,
-    },
-    botaoCancelar: {
-        flex: 1,
-        paddingVertical: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        alignItems: 'center',
-    },
-    botaoSalvar: {
-        flex: 1,
-        paddingVertical: 12,
-        borderRadius: 8,
-        backgroundColor: '#1a3a5c',
-        alignItems: 'center',
-    },
-    dadosHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    dadosRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 10,
-    },
-    dadosLabel: {
-        fontSize: 13,
-        color: '#888',
-    },
-    dadosValor: {
-        fontSize: 13,
-        fontWeight: 'bold',
-        color: '#111',
-        maxWidth: '60%',
-        textAlign: 'right',
-    },
-    dadosDivisor: {
-        height: 1,
-        backgroundColor: '#f0f0f0',
-    },
+const s = StyleSheet.create({
+    container: { flex: 1, backgroundColor: '#F4F6FB' },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 70, marginTop: 10 },
+    backButton: { position: 'absolute', left: 15, zIndex: 1 },
+    logo: { width: 70, height: 70, resizeMode: 'contain' },
+    bookInfoContainer: { alignItems: 'center', paddingVertical: 20 },
+    bookImage: { width: 150, height: 210, borderRadius: 10, resizeMode: 'cover', backgroundColor: '#eee' },
+    bookTitle: { fontSize: 22, fontWeight: 'bold', color: '#111', marginTop: 14, textAlign: 'center', paddingHorizontal: 20 },
+    bookAuthor: { fontSize: 15, color: '#666', marginTop: 4 },
+    leituraCard: { backgroundColor: '#1a3a5c', margin: 16, borderRadius: 12, padding: 16 },
+    leituraHeader: { flexDirection: 'row', justifyContent: 'space-between' },
+    leituraTitle: { color: '#fff', fontWeight: 'bold' },
+    editarText: { color: '#7ab8e0' },
+    leituraData: { color: '#b0d4f0', marginTop: 10 },
+    comentarioSalvo: { color: '#d0eaf8', marginTop: 10, fontStyle: 'italic', lineHeight: 18 },
+    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#111', marginBottom: 8 },
+    sobreText: { fontSize: 14, color: '#444', lineHeight: 22 },
+    semAvaliacoes: { textAlign: 'center', color: '#aaa', fontSize: 14, marginVertical: 16, paddingHorizontal: 20 },
+    card: { backgroundColor: '#fff', marginHorizontal: 16, marginTop: 12, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#e5e5e5' },
+    cardHeaderRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 10 },
+    avatar: { width: 44, height: 44, borderRadius: 22 },
+    cardTitle: { fontSize: 15, fontWeight: 'bold', color: '#1a3a5c' },
+    cardText: { color: '#333', lineHeight: 20, fontSize: 14 },
+    overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
+    editBox: { width: '88%', backgroundColor: '#fff', borderRadius: 14, padding: 20 },
+    editTitulo: { fontSize: 18, fontWeight: 'bold', color: '#111', marginBottom: 15 },
+    editLabel: { fontSize: 13, color: '#666', marginBottom: 6 },
+    input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 15, color: '#111', marginBottom: 18 },
+    inputComentario: { height: 100, marginBottom: 20 },
+    botaoCancelar: { flex: 1, paddingVertical: 12, borderRadius: 8, borderWidth: 1, borderColor: '#ddd', alignItems: 'center' },
+    botaoSalvar: { flex: 1, paddingVertical: 12, borderRadius: 8, backgroundColor: '#1a3a5c', alignItems: 'center' },
 });

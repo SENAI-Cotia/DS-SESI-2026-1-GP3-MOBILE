@@ -1,12 +1,35 @@
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useAuth } from '@/context/AuthContext';
 import { useRouter } from "expo-router";
-
-
+import React, { useState } from "react";
+import { ActivityIndicator, Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { api } from '@/lib/api';
 
 export default function Index() {
-    const router = useRouter();
+    const router    = useRouter();
+    const { login } = useAuth();
+
+    const [email, setEmail]           = useState('');
+    const [senha, setSenha]           = useState('');
+    const [carregando, setCarregando] = useState(false);
+
+    async function handleLogin() {
+        if (!email.trim() || !senha) {
+            Alert.alert('Atenção', 'Preencha e-mail/CPF e senha.');
+            return;
+        }
+        setCarregando(true);
+        try {
+            await login(email, senha);
+        } catch (err: any) {
+            const msg = err.response?.data?.error || err.message || 'Credenciais inválidas.';
+            Alert.alert('Erro ao entrar', msg);
+        } finally {
+            setCarregando(false);
+        }
+    }
+
     return (
-        
+
         <View style={style.container}>
 
             <View style={style.card}>
@@ -17,20 +40,34 @@ export default function Index() {
 
 
                 <Text style={style.label}>E-mail ou CPF</Text>
-                <TextInput style={style.input} placeholder="E-mail/CPF" placeholderTextColor="#999" />
+                <TextInput
+                    style={style.input}
+                    placeholder="E-mail/CPF"
+                    placeholderTextColor="#999"
+                    value={email}
+                    onChangeText={setEmail}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                />
 
                 <Text style={style.label}>Senha</Text>
-                <TextInput style={style.input} placeholder="Senha" placeholderTextColor="#999" secureTextEntry={true} />
-                <TouchableOpacity>
-                    <Text style={style.link}>Esqueci minha senha</Text>
-                </TouchableOpacity>
+                <TextInput
+                    style={style.input}
+                    placeholder="Senha"
+                    placeholderTextColor="#999"
+                    secureTextEntry={true}
+                    value={senha}
+                    onChangeText={setSenha}
+                />
 
-                <TouchableOpacity onPress={() => router.push("/inicial")}>
-                    <View style={style.button}>
-                        <Text style={style.textButton}>Entrar</Text>
+                <TouchableOpacity onPress={handleLogin} disabled={carregando}>
+                    <View style={[style.button, carregando && { opacity: 0.7 }]}>
+                        {carregando
+                            ? <ActivityIndicator color="#fff" style={{ paddingVertical: 12 }} />
+                            : <Text style={style.textButton}>Entrar</Text>
+                        }
                     </View>
                 </TouchableOpacity>
-                <Text style={style.labelCentral}>Não possui uma conta?<TouchableOpacity  onPress={() => router.push("/cadastro")}><Text style={style.linkCadastre}>Cadastre-se</Text></TouchableOpacity></Text>
             </View>
         </View>
 
@@ -70,7 +107,7 @@ const style = StyleSheet.create({
         textAlign: "center",
         paddingVertical: 12,
     },
-    button:{
+    button: {
         backgroundColor: "#3E579D",
         borderRadius: 15,
         marginTop: 16,
@@ -119,5 +156,3 @@ const style = StyleSheet.create({
 
 
 })
-
-
