@@ -2,6 +2,7 @@
   "extends": "expo/tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-native",
+    "module": "ESNext",
     "strict": true,
     "paths": {
       "@/*": [
